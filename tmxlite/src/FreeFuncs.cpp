@@ -27,7 +27,8 @@ source distribution.
 
 #include <tmxlite/FreeFuncs.hpp>
 #include <tmxlite/detail/Log.hpp>
-#include "miniz.h"
+#include <zlib.h>
+//#include "miniz.h"
 
 #include <cstring>
 
@@ -50,12 +51,12 @@ bool tmx::decompress(const char* source, std::vector<unsigned char>& dest, std::
     stream.next_out = (Bytef*)byteArray.data();
     stream.avail_out = static_cast<unsigned int>(expectedSize);
 
-    //we'd prefer to use inflateInit2 but it appears 
+    //we'd prefer to use inflateInit2 but it appears
     //to be incorrect in miniz. This is fine for zlib
     //compressed data, but gzip compressed streams
     //will fail to inflate. IMO still preferable to
     //trying to build/link zlib
-    if (inflateInit(&stream/*, 15 + 32*/) != Z_OK)
+    if (inflateInit2(&stream, 15 + 32) != Z_OK)
     {
         LOG("inflate init failed", Logger::Type::Error);
         return false;
