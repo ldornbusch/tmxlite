@@ -1,5 +1,5 @@
 /*********************************************************************
-Matt Marchant 2016 - 2023
+Matt Marchant 2016 - 2021
 http://trederia.blogspot.com
 
 tmxlite - Zlib license.
@@ -24,14 +24,13 @@ and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any
 source distribution.
 *********************************************************************/
-
-#ifndef USE_EXTLIBS
-#include "miniz.h"
+#ifdef USE_ZIP_LIB
+  #include <zlib.h>
 #else
-#include <zlib.h>
-#endif
+  #include "miniz.h"
+#endif // ZIP_LIB_USED
+
 #include <tmxlite/FreeFuncs.hpp>
-#include <tmxlite/Types.hpp>
 #include <tmxlite/detail/Log.hpp>
 
 #include <cstring>
@@ -44,10 +43,6 @@ bool tmx::decompress(const char* source, std::vector<unsigned char>& dest, std::
         return false;
     }
 
-//#ifdef USE_EXTLIBS
-
-
-//#else
     int currentSize = static_cast<int>(expectedSize);
     std::vector<unsigned char> byteArray(expectedSize / sizeof(unsigned char));
     z_stream stream;
@@ -59,15 +54,17 @@ bool tmx::decompress(const char* source, std::vector<unsigned char>& dest, std::
     stream.next_out = (Bytef*)byteArray.data();
     stream.avail_out = static_cast<unsigned int>(expectedSize);
 
-    //we'd prefer to use inflateInit2 but it appears 
+    //we'd prefer to use inflateInit2 but it appears
     //to be incorrect in miniz. This is fine for zlib
     //compressed data, but gzip compressed streams
-    //will fail to inflate.
-#ifdef USE_EXTLIBS
+    //will fail to inflate. IMO still preferable to
+    //trying to build/link zlib
+#ifdef USE_ZIP_LIB
     if (inflateInit2(&stream, 15 + 32) != Z_OK)
 #else
     if (inflateInit(&stream) != Z_OK)
-#endif
+#endif // ZIP_LIB_USED
+
     {
         LOG("inflate init failed", Logger::Type::Error);
         return false;
@@ -122,12 +119,6 @@ bool tmx::decompress(const char* source, std::vector<unsigned char>& dest, std::
 
     //copy bytes to vector
     dest.insert(dest.begin(), byteArray.begin(), byteArray.end());
-//#endif
-    return true;
-}
 
-std::ostream& operator << (std::ostream& os, const tmx::Colour& c)
-{
-    os << "RGBA: " << (int)c.r << ", " << (int)c.g << ", " << (int)c.b << ", " << (int)c.a;
-    return os;
+    return true;
 }
