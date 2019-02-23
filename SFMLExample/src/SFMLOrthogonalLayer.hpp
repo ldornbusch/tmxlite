@@ -91,6 +91,14 @@ public:
 
     const sf::FloatRect& getGlobalBounds() const { return m_globalBounds; }
 
+    void generateTiles()
+    {
+        for (auto& chunk : m_chunks)
+        {
+            chunk->maybeRegenerate(true);
+        }
+    }
+
     void setTile(int tileX, int tileY, tmx::TileLayer::Tile tile, bool refresh = true)
     {
         sf::Vector2u chunkLocale;
@@ -604,7 +612,7 @@ private:
                 {
                     as.startTime = elapsed;
                 }
-                setTile(as.tileCords.x, as.tileCords.y, tile);
+                setTile(as.tileCords.x, as.tileCords.y, tile);  // TODO: check if tile was changed!
             }
         }
     }
