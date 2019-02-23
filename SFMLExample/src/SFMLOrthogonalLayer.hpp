@@ -92,6 +92,14 @@ public:
 
     const sf::FloatRect& getGlobalBounds() const { return m_globalBounds; }
 
+    void generateTiles()
+    {
+        for (auto& chunk : m_chunks)
+        {
+            chunk->maybeRegenerate(true);
+        }
+    }
+
     void setTile(int tileX, int tileY, tmx::TileLayer::Tile tile, bool refresh = true)
     {
         sf::Vector2u chunkLocale;
