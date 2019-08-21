@@ -44,6 +44,7 @@ are implemented.
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Transformable.hpp>
+#include <SFML/System/Time.hpp>
 
 #include <memory>
 #include <vector>
@@ -89,6 +90,9 @@ public:
     MapLayer(const MapLayer&) = delete;
     MapLayer& operator = (const MapLayer&) = delete;
 
+    MapLayer(MapLayer&&) = default;
+    MapLayer& operator = (MapLayer&&) = default;
+
     const sf::FloatRect& getGlobalBounds() const { return m_globalBounds; }
 
     void generateTiles()
@@ -99,11 +103,11 @@ public:
         }
     }
 
-    void setTile(int tileX, int tileY, tmx::TileLayer::Tile tile, bool refresh = true)
+    void setTile(int tileX, int tileY, tmx::TileLayer::Tile tile)
     {
         sf::Vector2u chunkLocale;
         const auto& selectedChunk = getChunkAndTransform(tileX, tileY, chunkLocale);
-        selectedChunk->setTile(chunkLocale.x, chunkLocale.y, tile, refresh);
+        selectedChunk->setTile(chunkLocale.x, chunkLocale.y, tile);
     }
 
     tmx::TileLayer::Tile getTile(int tileX, int tileY)
@@ -112,11 +116,11 @@ public:
         const auto& selectedChunk = getChunkAndTransform(tileX, tileY, chunkLocale);
         return selectedChunk->getTile(chunkLocale.x, chunkLocale.y);
     }
-    void setColor(int tileX, int tileY, sf::Color color, bool refresh = true)
+    void setColor(int tileX, int tileY, sf::Color color)
     {
         sf::Vector2u chunkLocale;
         const auto& selectedChunk = getChunkAndTransform(tileX, tileY, chunkLocale);
-        selectedChunk->setColor(chunkLocale.x, chunkLocale.y, color, refresh);
+        selectedChunk->setColor(chunkLocale.x, chunkLocale.y, color);
     }
 
     sf::Color getColor(int tileX, int tileY)
@@ -173,6 +177,7 @@ private:
             chunkTileCount.y = tileCount.y;
             mapTileSize = tileSize;
             const auto& tileIDs = layer.getTiles();
+            isDirty=true;   // we need to initial set all tiles
 
             //go through the tiles and create all arrays (for latter manipulation)
             for (const auto& ts : tilesets)
@@ -265,23 +270,24 @@ private:
         {
             return m_chunkTileIDs[calcIndexFrom(x,y)];
         }
-        void setTile(int x, int y, tmx::TileLayer::Tile tile, bool refresh)
+        void setTile(int x, int y, tmx::TileLayer::Tile tile)
         {
             m_chunkTileIDs[calcIndexFrom(x,y)] = tile;
-            maybeRegenerate(refresh);
+            isDirty = true;
         }
         sf::Color getColor(int x, int y) const
         {
             return m_chunkColors[calcIndexFrom(x,y)];
         }
-        void setColor(int x, int y, sf::Color color, bool refresh)
+        void setColor(int x, int y, sf::Color color)
         {
             m_chunkColors[calcIndexFrom(x,y)] = color;
-            maybeRegenerate(refresh);
+            isDirty = true;
         }
+
         void maybeRegenerate(bool refresh)
         {
-            if (refresh)
+            if (refresh && isDirty)
             {
                 for (const auto& ca : m_chunkArrays)
                 {
@@ -289,6 +295,7 @@ private:
                 }
                 generateTiles();
             }
+            isDirty = false;
         }
         int calcIndexFrom(int x, int y) const
         {
@@ -454,6 +461,7 @@ private:
         sf::Vector2f chunkTileCount;   // chunk tilecount
         std::vector<tmx::TileLayer::Tile> m_chunkTileIDs; // stores all tiles in this chunk for later manipulation
         std::vector<sf::Color> m_chunkColors; // stores colors for extended color effects
+        bool isDirty;   // if color or tile was set, isDirty marks that chunk must be regenerated (if visible)
         std::map<std::uint32_t, tmx::Tileset::Tile> m_animTiles;    // animation catalogue
         std::vector<AnimationState> m_activeAnimations;     // Animations to be done in this chunk
         std::vector<ChunkArray::Ptr> m_chunkArrays;
@@ -584,6 +592,7 @@ private:
         updateVisibility(rt.getView());
         for (const auto& c : m_visibleChunks)
         {
+            c->maybeRegenerate(true);
             rt.draw(*c, states);
         }
     }

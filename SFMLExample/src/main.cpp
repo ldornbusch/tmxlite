@@ -50,7 +50,7 @@ int main()
     MapLayer layerFour(map, 4);
 
     tmx::TileLayer::Tile t = layerOne.getTile(24,13);
-    layerFour.setTile(37,5,t,true);
+    layerFour.setTile(37,5,t);
 
     for(int x=0; x<5; x++)
     {
@@ -59,20 +59,20 @@ int main()
         layerZero.setColor(43,20+x,sf::Color(140,140,140,255));
     }
 
-    layerThree.setColor(3,4,sf::Color::White,true);
-    layerThree.setColor(3,5,sf::Color::White,true);
-    layerThree.setColor(3,22,sf::Color::White,true);
-    layerThree.setColor(3,23,sf::Color::White,true);
-    layerThree.setColor(8,22,sf::Color::White,true);
-    layerThree.setColor(8,23,sf::Color::White,true);
+    layerThree.setColor(3,4,sf::Color::White);
+    layerThree.setColor(3,5,sf::Color::White);
+    layerThree.setColor(3,22,sf::Color::White);
+    layerThree.setColor(3,23,sf::Color::White);
+    layerThree.setColor(8,22,sf::Color::White);
+    layerThree.setColor(8,23,sf::Color::White);
 
     for(int y=0; y<5; y++)
     {
         for(int x=0; x<5; x++)
         {
-            layerZero.setColor(57+6*x,14+y,sf::Color(140,140,140,255), true);
-            layerZero.setColor(58+6*x,14+y,sf::Color(140,140,140,255), true);
-            layerZero.setColor(59+6*x,14+y,sf::Color(140,140,140,255), true);
+            layerZero.setColor(57+6*x,14+y,sf::Color(140,140,140,255));
+            layerZero.setColor(58+6*x,14+y,sf::Color(140,140,140,255));
+            layerZero.setColor(59+6*x,14+y,sf::Color(140,140,140,255));
         }
     }
 
@@ -102,24 +102,24 @@ int main()
         int delta=(255-180)/2;
         double intensity = sin(static_cast<double>(frames)/11) * delta+delta;
         auto c = sf::Color(intensity+180, intensity+180, intensity+180);
-        layerZero.setColor(4,9,c,false);
-        layerZero.setColor(4,10,c,false);
-        layerZero.setColor(5,9,c,false);
-        layerZero.setColor(5,10,c,false);
+        layerZero.setColor(4,9,c);
+        layerZero.setColor(4,10,c);
+        layerZero.setColor(5,9,c);
+        layerZero.setColor(5,10,c);
 
-        layerFour.setColor(9,12,c,false);
-        layerFour.setColor(10,12,c,false);
-        layerFour.setColor(11,12,c,false);
-        layerFour.setColor(9,13,c,false);
-        layerFour.setColor(10,13,c,false);
-        layerFour.setColor(11,13,c,true);
+        layerFour.setColor(9,12,c);
+        layerFour.setColor(10,12,c);
+        layerFour.setColor(11,12,c);
+        layerFour.setColor(9,13,c);
+        layerFour.setColor(10,13,c);
+        layerFour.setColor(11,13,c);
 
 
         c = sf::Color(intensity*0.75+180, intensity*0.75+180, intensity*0.75+180);
-        layerZero.setColor(3,9,c,false);
-        layerZero.setColor(3,10,c,false);
-        layerZero.setColor(6,9,c,false);
-        layerZero.setColor(6,10,c,true);
+        layerZero.setColor(3,9,c);
+        layerZero.setColor(3,10,c);
+        layerZero.setColor(6,9,c);
+        layerZero.setColor(6,10,c);
 
         sf::Time duration = globalClock.getElapsedTime();
         layerZero.update(duration);
@@ -140,10 +140,9 @@ int main()
             {
             intensity = sin(static_cast<double>(frames)/15+static_cast<double>(y*x)/2000) * delta+delta;
             c = sf::Color(intensity+min*r, intensity+min*g, intensity+min*b);
-                layerZero.setColor(x,y,c, false);
+                layerZero.setColor(x,y,c);
             }
         }
-        layerZero.generateTiles();
 
         window.clear(sf::Color::Black);
         window.draw(layerZero);
